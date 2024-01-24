@@ -1,0 +1,43 @@
+version: '3'
+services:
+  bababos-backend:
+    build: ./bababos-backend
+    container_name: bababos-backend
+    environment:
+      - POSTGRES_DB_HOST=bababosdb
+      - POSTGRES_USER=bababos
+      - POSTGRES_PASSWORD=bababospass
+      - POSTGRES_DB_PORT=5432
+      - POSTGRES_DB_NAME=bababosdb
+    ports:
+      - 8080:8080
+    links:
+      - bababosdb
+    depends_on:
+      - bababosdb
+    restart: on-failure:10
+  bababosdb:
+    image: postgres:15-alpine
+    ports:
+      - 5432:5432
+    volumes:
+      - ./bababos-data:/var/lib/postgresql/data
+      - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+    environment:
+      - POSTGRES_DB=bababosdb
+      - POSTGRES_USER=bababos
+      - POSTGRES_PASSWORD=bababospass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d bababosdb -U bababos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  migrate:
+    image: migrate/migrate
+    volumes:
+        - ./bababos-backend/migrations:/migrations
+    command: ["-path", "/migrations", "-database",  "postgres://bababos:bababospass@bababosdb:5432/bababosdb?sslmode=disable", "up"]
+    links: 
+        - bababosdb
+    
