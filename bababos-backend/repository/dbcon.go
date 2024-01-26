@@ -23,6 +23,7 @@ func NewRepository() Repository {
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_DB_NAME"),
 	)
+
 	db, err := sqlx.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatal(err)

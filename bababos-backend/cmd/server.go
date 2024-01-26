@@ -20,11 +20,15 @@ func NewServer() {
 	customerService := handler.NewCustomerhandler(&repository.Repository{DB: db.DB})
 
 	// initiate historicalpo service
-	HistoricalpoService := handler.NewHistoricalpoHandler(&repository.Repository{DB: db.DB})
+	historicalpoService := handler.NewHistoricalpoHandler(&repository.Repository{DB: db.DB})
+
+	// initiate historicalpo service
+	pricelistsService := handler.NewPricelistsHandler(&repository.Repository{DB: db.DB})
 
 	r := mux.NewRouter()
 	r.HandleFunc("/customers", customerService.GetCustomersHandler).Methods("GET")
-	r.HandleFunc("/historicalpo", HistoricalpoService.GetHistoricalposHandler).Methods("GET")
+	r.HandleFunc("/historicalpo", historicalpoService.GetHistoricalposHandler).Methods("GET")
+	r.HandleFunc("/pricelist", pricelistsService.GetPricelistsHandler).Methods("GET")
 	http.Handle("/", r)
 
 	// Create a server and specify the address and port to listen on

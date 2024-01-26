@@ -5,5 +5,5 @@ DROP TABLE IF EXISTS suppliers;
 DROP TABLE IF EXISTS logistics;
 DROP TABLE IF EXISTS rfqs;
 DROP TABLE IF EXISTS pricelists;
-DROP TABLE IF EXISTS historypo;
+DROP TABLE IF EXISTS historicalpo;
 

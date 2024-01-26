@@ -15,14 +15,23 @@ services:
       - bababosdb
     depends_on:
       - bababosdb
-    restart: on-failure:10
+    restart: on-failure:5
+  bababos-frontend:
+    build: ./bababos-frontend
+    container_name: bababos-frontend
+    ports:
+      - 3000:3000
+    links:
+      - bababos-backend
+    depends_on:
+      - bababos-backend
   bababosdb:
     image: postgres:15-alpine
     ports:
       - 5432:5432
     volumes:
       - ./bababos-data:/var/lib/postgresql/data
-      - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+      - ./create-db.sql:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_DB=bababosdb
       - POSTGRES_USER=bababos

@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 COPY . /app
+COPY ./migrations/seed/historicalpo.csv /app/migrations/seed/historicalpo.csv
 
 # Build the Go application
 RUN go build -o main ./cmd/server.go

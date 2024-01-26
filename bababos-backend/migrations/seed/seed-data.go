@@ -2,9 +2,11 @@ package seed
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -24,7 +26,7 @@ func Seed() {
 
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	defer db.Close()
 
@@ -32,8 +34,10 @@ func Seed() {
 	supplierSeed(db)
 	rfqsSeed(db)
 	PriceListSeed(db)
-	historicalPOSeed(db)
-
+	err = insertHistoricalPOData(db, "/app/migrations/seed/historicalpo.csv")
+	if err != nil {
+		log.Print(err)
+	}
 }
 
 func customerSeed(db *sql.DB) {
@@ -61,7 +65,7 @@ func customerSeed(db *sql.DB) {
 			data.CustomerID, data.Address, data.City, data.State)
 
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 	}
 
@@ -98,7 +102,7 @@ func supplierSeed(db *sql.DB) {
 			data.SupplierID, data.Address, data.City, data.State)
 
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 	}
 
@@ -147,7 +151,7 @@ func rfqsSeed(db *sql.DB) {
 			data.CustomerID, data.SKUID, data.Quantity, data.UnitOfMeasure)
 
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 	}
 
@@ -221,80 +225,91 @@ func PriceListSeed(db *sql.DB) {
 			data.SupplierID, data.SKUID, data.PricePerUnit, data.StockAvailable)
 
 		if err != nil {
-			log.Fatal(err)
+			log.Print(err)
 		}
 	}
 
 	fmt.Println("Data seeded successfully.")
 }
 
-func historicalPOSeed(db *sql.DB) {
-	// Order data
-	type historicalPO struct {
+func insertHistoricalPOData(db *sql.DB, filePath string) error {
+
+	type HistoricalPO struct {
 		CustomerID       string
 		OrderDate        string
 		SKUCode          string
 		SKUID            string
 		SKUName          string
-		OrderQty         int
+		OrderQuantity    int
 		OrderUnit        string
-		UnitSellingPrice int
+		UnitSellingPrice float64
 	}
 
-	// Seed data
-	seedData := []historicalPO{
-		{"M1-PUMS-11", "20/12/2022", "SIK-8080", "SIK-080080-IBB", "Siku 80 mm x 80 mm x 6 mtr (KS/Ispat)", 10, "Batang", 581982},
-		{"M1-PUMS-11", "20/12/2022", "SIK-9090", "SIK-090090-KS", "Siku 90 mm x 90 mm x 6 mtr (KS/Ispat)", 52, "Batang", 738739},
-		{"M1-PUMS-11", "20/12/2022", "SIK-100100", "SIK-100100-IBB", "Siku 100 mm x 100 mm x 6 mtr (KS/Ispat)", 90, "Batang", 910360},
-		{"M1-STQI-11", "17/01/2023", "PLT-BRDS23", "PLT-BRDS0230", "Besi Plat Bordes Tebal 2.3 mm x 1200 mm x 2400 mm", 100, "Lembar", 902832},
-		{"M1-STQI-11", "17/01/2023", "PLT-SPHC1.55", "PLT-SPHC0155", "Plat Hitam Tebal 1.55 mm 1200 mm x 2400 mm", 200, "Lembar", 502978},
-		{"M1-STQI-11", "17/01/2023", "PLT-SPHC1.8", "PLT-SPHC0180", "Plat Hitam Tebal 1.8 mm 1200 mm x 2400 mm", 50, "Lembar", 576828},
-		{"M1-STQI-11", "19/01/2023", "PLT-SPHC2.6", "PLT-SPHC0026", "Plat Hitam Tebal 2.6 mm 1200 mm x 2400 mm", 10, "Lembar", 831644},
-		{"M1-STQI-11", "19/01/2023", "PLT-SPHC2.8", "PLT-SPHC0280", "Plat Hitam Tebal 2.8 mm 1200 mm x 2400 mm", 20, "Lembar", 902927},
-		{"M1-PUMS-11", "20/01/2023", "PIP-SCH404", "PIP-SCH404", "Pipa Hitam 4\" Sch x 6 m", 3, "Batang", 1557900},
-		{"M1-PUMS-11", "20/01/2023", "PIP-SCH406", "PIP-SCH4060", "Pipa Hitam 6\" Sch x 6 m", 3, "Batang", 2724300},
-		{"M1-PUMS-11", "20/01/2023", "PIP-SCH408", "PIP-SCH4080", "Pipa Hitam 8\" Sch x 6 m", 2, "Batang", 4158900},
-		{"M1-PUMS-11", "20/01/2023", "PLT-SPHC4", "PLT-SPHC0400", "Besi Plat SPHC Tebal 6.0 mm x 1200 mm x 2400 mm (KS)", 3, "Lembar", 1782900},
-		{"M1-PUMS-11", "20/01/2023", "PLT-SPHC5", "PLT-SPHC0500", "Besi Plat SPHC Tebal 8.0 mm x 1200 mm x 2400 mm (KS)", 5, "Lembar", 2364570},
-		{"M1-PUMS-11", "20/01/2023", "PLT-SPHC6", "PLT-SPHC0600", "Besi Plat SPHC Tebal 10 mm x 1200 mm x 2400 mm (GG)", 4, "Lembar", 2946285},
-		{"M1-PUMS-11", "20/01/2023", "PLT-SPHC10", "PLT-SPHC1000", "Besi Plat SPHC Tebal 16 mm x 1200 mm x 2400 mm (GG)", 1, "Lembar", 4766940},
-		{"M1-PUMS-11", "20/01/2023", "PLT-SPHC8", "PLT-SPHC1200-GG", "Besi Plat SPHC Tebal 12 mm x 1200 mm x 2400 mm (GG)", 11, "Lembar", 3540600},
-		{"M1-PUMS-11", "20/01/2023", "PLT-SPHC8", "PLT-SPHC1200-GG", "Besi Plat SPHC Tebal 12 mm x 1200 mm x 2400 mm (GG)", 14, "Lembar", 3540600},
-		{"M1-PUMS-11", "20/01/2023", "SIK-4040", "SIK-040040-IBB", "Siku 40 mm x 40 mm x 6 mtr (KS)", 51, "Batang", 156600},
-		{"M1-PUMS-11", "20/01/2023", "SIK-5050", "SIK-050050-IBB", "Siku 50 mm x 50 mm x 6 mtr (KS)", 72, "Batang", 246600},
-		{"M1-PUMS-11", "20/01/2023", "SIK-6060", "SIK-060060-IBB", "Siku 60 mm x 60 mm x 6 mtr (KS)", 8, "Batang", 353700},
-		{"M1-PUMS-11", "20/01/2023", "SIK-7070", "SIK-070070-IBB", "Siku 70 mm x 70 mm x 6 mtr (KS)", 8, "Batang", 482400},
-		{"M1-PUMS-11", "20/01/2023", "SIK-8080", "SIK-080080-IBB", "Siku 80 mm x 80 mm x 6 mtr (KS)", 10, "Batang", 633150},
-		{"M1-PUMS-11", "20/01/2023", "SIK-9090", "SIK-090090-KS", "Siku 90 mm x 90 mm x 6 mtr (KS)", 17, "Batang", 803700},
-		{"M1-PUMS-11", "20/01/2023", "SIK-100100", "SIK-100100-IBB", "Siku 100 mm x 100 mm x 6 mtr (KS)", 1, "Batang", 990000},
-		{"M1-PUMS-11", "20/01/2023", "SIK-100100", "SIK-100100-IBB", "Siku 100 mm x 100 mm x 6 mtr (KS)", 18, "Batang", 990000},
-		{"M1-PUMS-11", "20/01/2023", "SIK-120120", "SIK-120120-IBB", "Siku 120 mm x 120 mm x 6 mtr (KS)", 5, "Batang", 1446300},
-		{"M1-PUMS-11", "20/01/2023", "SIK-120120", "SIK-120120-IBB", "Siku 120 mm x 120 mm x 6 mtr (KS)", 20, "Batang", 1446300},
-		{"M1-STQI-11", "20/01/2023", "PLT-SPHC2.8", "PLT-SPHC0280", "Plat Hitam Tebal 2.8 mm 1200 mm x 2400 mm", 20, "Lembar", 902927},
-		{"M1-SUGP-11", "27/01/2023", "SIK-4040", "SIK-040040-IBB", "Besi Siku 40 mm x 40 mm x 4 mm x 6 m IBB", 30, "Batang", 162973},
-		{"M1-SUGP-11", "27/01/2023", "SIK-5050", "SIK-050050-IBB", "Besi Siku 50 mm x 50 mm x 5 mm x 12 m IBB", 60, "Batang", 514147},
-		{"M1-SUGP-11", "27/01/2023", "SIK-6060", "SIK-060060-IBB", "Besi Siku 60 mm x 60 mm x 6 mm x 12 m IBB", 50, "Batang", 737809},
-		{"M1-SUGP-11", "27/01/2023", "SIK-7070", "SIK-070070-IBB", "Besi Siku 70 mm x 70 mm x 7 mm x 6 m IBB", 120, "Batang", 503237},
-		{"M1-SUGP-11", "27/01/2023", "SIK-8080", "SIK-080080-IBB", "Besi Siku 80 mm x 80 mm x 8 mm x 12 m IBB", 15, "Batang", 1322680},
-		{"M1-SUGP-11", "27/01/2023", "SIK-100100", "SIK-100100-IBB", "Besi Siku 100 mm x 100 mm x 8 mm x 12 m IBB", 30, "Batang", 1674972},
-		{"M1-SUGP-11", "27/01/2023", "SIK-120120", "SIK-120120-IBB", "Besi Siku 120 mm x 120 mm x 10 mm x 12 m IBB", 11, "Batang", 2542785},
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	// Assuming the first row contains the header, use it to get column indices
+	header, err := reader.Read()
+	if err != nil {
+		return err
 	}
 
-	for _, data := range seedData {
-		orderdate := formatDate(data.OrderDate)
-		_, err := db.Exec(`
-		INSERT INTO historypo (customer_id, order_date, sku_id, order_quantity, order_unit, unit_selling_price)
-		VALUES ($1, $2, $3, $4, $5, $6)`,
-			data.CustomerID, orderdate, data.SKUID, data.OrderQty, data.OrderUnit, data.UnitSellingPrice)
+	for {
+		line, err := reader.Read()
+		if err != nil {
+			break
+		}
+
+		data := make(map[string]string)
+		for i, value := range line {
+			data[header[i]] = value
+		}
+
+		historicalPO := HistoricalPO{
+			CustomerID:       data["customer_id"],
+			OrderDate:        formatDate(data["order_date"]),
+			SKUCode:          data["sku_code"],
+			SKUID:            data["sku_id"],
+			SKUName:          data["sku_name"],
+			OrderQuantity:    atoi(data["order_quantity"]),
+			OrderUnit:        data["order_unit"],
+			UnitSellingPrice: atof(data["unit_selling_price"]),
+		}
+
+		// Insert into the database
+		_, err = db.Exec(`
+			INSERT INTO historicalpo (customer_id, order_date, sku_code, sku_id, sku_name, order_quantity, order_unit, unit_selling_price)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		`, historicalPO.CustomerID, historicalPO.OrderDate, historicalPO.SKUCode, historicalPO.SKUID, historicalPO.SKUName, historicalPO.OrderQuantity, historicalPO.OrderUnit, historicalPO.UnitSellingPrice)
 
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 
-	fmt.Println("Data seeded successfully.")
-
+	return nil
 }
+
+func atoi(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 0
+	}
+	return i
+}
+
+func atof(s string) float64 {
+	f, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		return 0
+	}
+	return f
+}
+
 func formatDate(s string) string {
 	// Parse the input string into a time.Time value
 	t, err := time.Parse("02/01/2006", s)

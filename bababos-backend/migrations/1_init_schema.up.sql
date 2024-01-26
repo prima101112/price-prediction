@@ -45,11 +45,13 @@ CREATE TABLE IF NOT EXISTS pricelists (
     stock_available INT NOT NULL /* stock - sku id may be will be separated from pricelist in the future */
 );
 
-CREATE TABLE IF NOT EXISTS historypo (
+CREATE TABLE IF NOT EXISTS historicalpo (
     id SERIAL PRIMARY KEY,
     customer_id VARCHAR(255) NOT NULL,
     order_date DATE NOT NULL,
+    sku_code VARCHAR(20) NOT NULL,
     sku_id VARCHAR(20) NOT NULL,
+    sku_name VARCHAR(255) NOT NULL,
     order_quantity INT NOT NULL,
     order_unit VARCHAR(12) NOT NULL,
     unit_selling_price FLOAT NOT NULL
