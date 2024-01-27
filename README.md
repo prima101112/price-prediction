@@ -4,7 +4,7 @@
 
 In this simple example of price prediction, we utilize a straightforward API-based architecture.
 
-![Architecture Diagram](./docs/diagram1.png)
+![Architecture Diagram](./docs/diagram1.png | width=150)
 
 ### Bababos Backend
 
@@ -14,7 +14,7 @@ Bababos backend is a simple Golang application that opens an API to the frontend
 
 This is a small Vue.js Single Page Application (SPA) designed to showcase the functionality of the application. Its core function is to allow users to select an SKU_ID and determine the optimal selling price based on various variables and considerations.
 
-## Bababos Data 
+### Bababos Data 
 
 This folder serves as a storage location when the application is composed.
 
@@ -23,6 +23,13 @@ This folder serves as a storage location when the application is composed.
 ### Dockerized
 
 This application is dockerized for easy deployment. You can use Orbstack or Docker Desktop to run it effortlessly.
+
+clone the repository
+
+with https
+```bash
+git clone https://github.com/prima101112/price-prediction.git
+```
 
 ```bash
 docker-compose up --force-recreate --build -d
@@ -44,4 +51,6 @@ seed.Seed()
 ...
 ```
 By doing this, seeding will be skipped on subsequent runs of the application.
+
+## Architecture
 
