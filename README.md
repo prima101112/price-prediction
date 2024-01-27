@@ -4,11 +4,15 @@
 
 In this simple example of price prediction, we utilize a straightforward API-based architecture.
 
-![Architecture Diagram](./docs/diagram1.png | width=150)
+![Architecture Diagram](./docs/diagram1.png)
 
 ### Bababos Backend
 
 Bababos backend is a simple Golang application that opens an API to the frontend. All the logic for price sales prediction resides within this application. The database connection, queries, and logic are included in the repository folder. As the code base grows, these components can be separated for better organization.
+
+in bababos backend there is a flow chart for the key feature of the app
+
+![Architecture Diagram](./docs/diagram2.png)
 
 ### Bababos Frontend
 
