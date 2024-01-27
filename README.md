@@ -4,7 +4,7 @@
 
 In this simple example of price prediction, we utilize a straightforward API-based architecture.
 
-![Architecture Diagram](./docs/diagram1.png)
+<img src="./docs/diagram1.png" width="400">
 
 ### Bababos Backend
 
@@ -12,7 +12,7 @@ Bababos backend is a simple Golang application that opens an API to the frontend
 
 in bababos backend there is a flow chart for the key feature of the app
 
-![Architecture Diagram](./docs/diagram2.png)
+<img src="./docs/diagram2.png" width="400">
 
 ### Bababos Frontend
 
