@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -25,11 +26,16 @@ func NewServer() {
 	// initiate historicalpo service
 	pricelistsService := handler.NewPricelistsHandler(&repository.Repository{DB: db.DB})
 
+	//cors
 	r := mux.NewRouter()
-	r.HandleFunc("/customers", customerService.GetCustomersHandler).Methods("GET")
-	r.HandleFunc("/historicalpo", historicalpoService.GetHistoricalposHandler).Methods("GET")
-	r.HandleFunc("/pricelist", pricelistsService.GetPricelistsHandler).Methods("GET")
-	http.Handle("/", r)
+
+	// Add CORS middleware
+	r.Use(corsMiddleware)
+
+	// Define routes
+	r.HandleFunc("/customers", customerService.GetCustomersHandler).Methods("GET", "OPTIONS")
+	r.HandleFunc("/historicalpo", historicalpoService.GetHistoricalposHandler).Methods("GET", "OPTIONS")
+	r.HandleFunc("/pricelist", pricelistsService.GetPricelistsHandler).Methods("GET", "OPTIONS")
 
 	// Create a server and specify the address and port to listen on
 	serverAddr := ":8080" // You can change the port as needed
@@ -52,4 +58,23 @@ func main() {
 	// seeding not needed in staging or production
 	seed.Seed()
 	NewServer()
+}
+
+// Define the CORS middleware function
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r)
+		// Set CORS headers
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			fmt.Fprint(w, "OK")
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

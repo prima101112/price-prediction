@@ -18,15 +18,15 @@ import (
 
 // create repository database operation for customer
 type HistoricalPO struct {
-	ID               int
-	CustomerID       string
-	OrderDate        string
-	SKUCode          string
-	SKUID            string
-	SKUName          string
-	OrderQuantity    int
-	OrderUnit        string
-	UnitSellingPrice float64
+	ID               int     `json:"id"`
+	CustomerID       string  `json:"customer_id"`
+	OrderDate        string  `json:"order_date"`
+	SKUCode          string  `json:"sku_code"`
+	SKUID            string  `json:"sku_id"`
+	SKUName          string  `json:"sku_name"`
+	OrderQuantity    int     `json:"order_quantity"`
+	OrderUnit        string  `json:"order_unit"`
+	UnitSellingPrice float64 `json:"unit_selling_price"`
 }
 
 type ResponsePrediction struct {

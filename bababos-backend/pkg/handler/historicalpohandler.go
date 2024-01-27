@@ -20,38 +20,33 @@ func NewHistoricalpoHandler(con *repository.Repository) *SvcHistoricalpo {
 
 func (svc *SvcHistoricalpo) GetHistoricalposHandler(w http.ResponseWriter, r *http.Request) {
 
-	type Query struct {
-		WhereClause string `json:"whereClause"`
-	}
-
-	//read json request body
-	var query Query
-	err := json.NewDecoder(r.Body).Decode(&query)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// Parse query parameters from the request URL
+	queryParams := r.URL.Query()
+	var err error
+	skuid := queryParams.Get("skuid")
 
 	var historicalpo []repository.HistoricalPO
-	if query.WhereClause == "" {
+	if skuid == "" {
 		log.Print("whereClause is empty")
 		// Fetch customer data from the database
 		historicalpo, err = svc.HistoricalpoRepository.GetAll()
-	} else {
-		log.Print("whereClause is not empty")
-		// Fetch customer data from the database based on the whereClause
-		historicalpo, err = svc.HistoricalpoRepository.GetWithWhereClause(query.WhereClause)
-	}
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	} else {
-		// Write the customer data as JSON to the response
-		err = json.NewEncoder(w).Encode(historicalpo)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+	} else {
+		// Fetch customer data from the database based on the whereClause
+		historicalpo, err = svc.HistoricalpoRepository.GetWithWhereClause("sku_id = " + skuid)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	// Write the customer data as JSON to the response
+	err = json.NewEncoder(w).Encode(historicalpo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }

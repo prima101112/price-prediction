@@ -280,6 +280,13 @@ func insertHistoricalPOData(db *sql.DB, filePath string) error {
 			UnitSellingPrice: atof(data["unit_selling_price"]),
 		}
 
+		//check if data already exist
+		var count int
+		db.QueryRow(`COUNT(*)`).Scan(&count)
+		if count == 0 {
+			return nil
+		}
+
 		// Insert into the database
 		_, err = db.Exec(`
 			INSERT INTO historicalpo (customer_id, order_date, sku_code, sku_id, sku_name, order_quantity, order_unit, unit_selling_price)
