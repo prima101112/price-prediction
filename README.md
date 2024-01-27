@@ -1,31 +1,30 @@
-# this is price prediction sample app
+# Price Prediction Sample Application
 
 ## Architecture
 
-In This simple example price prediction we will use simple architecture of API based architecture
+In this simple example of price prediction, we utilize a straightforward API-based architecture.
 
 ![Architecture Diagram](./docs/diagram1.png)
 
-### bababos-backend
+### Bababos Backend
 
-bababos backend is simple golang application that opena api to the frontend. all the logic of price sales prediction is in this application
-all the database connection query and logic is included in repository folder. it could be separated once our code base is getting biger
+Bababos backend is a simple Golang application that opens an API to the frontend. All the logic for price sales prediction resides within this application. The database connection, queries, and logic are included in the repository folder. As the code base grows, these components can be separated for better organization.
 
-### bababos-frontend
+### Bababos Frontend
 
-its little vue js SPA application to showcase the functionality of the applications. the core function is to choose an sku_id and show how much we should sell it with some variables and considerations
+This is a small Vue.js Single Page Application (SPA) designed to showcase the functionality of the application. Its core function is to allow users to select an SKU_ID and determine the optimal selling price based on various variables and considerations.
 
-## babaos-data 
+## Bababos Data 
 
-its just a folder when compose is run
+This folder serves as a storage location when the application is composed.
 
+## How to Run
 
-## How to run
+### Dockerized
 
-### dockerized
+This application is dockerized for easy deployment. You can use Orbstack or Docker Desktop to run it effortlessly.
 
-this application is dockerized you could use orbstack or docker desktop to run it easyly
-```
+```bash
 docker-compose up --force-recreate --build -d
 ```
 
@@ -38,11 +37,11 @@ that command will run all requirements
 
 ## Disable seeding
 
-After first run and try the sample data you could disable the data seeding by commenting line seed in 
-*bababos-backend/cmd/server.go*
+After the initial run and experimentation with the sample data, you can disable data seeding by commenting out the seed function call in bababos-backend/cmd/server.go:
 ```
 ...
 seed.Seed()
 ...
 ```
+By doing this, seeding will be skipped on subsequent runs of the application.
 
