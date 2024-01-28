@@ -23,7 +23,7 @@ func (svc *SvcHistoricalpo) GetHistoricalposHandler(w http.ResponseWriter, r *ht
 	// Parse query parameters from the request URL
 	queryParams := r.URL.Query()
 	var err error
-	skuid := queryParams.Get("skuid")
+	skuid := queryParams.Get("sku_id")
 
 	var historicalpo []repository.HistoricalPO
 	if skuid == "" {
@@ -36,7 +36,7 @@ func (svc *SvcHistoricalpo) GetHistoricalposHandler(w http.ResponseWriter, r *ht
 		}
 	} else {
 		// Fetch customer data from the database based on the whereClause
-		historicalpo, err = svc.HistoricalpoRepository.GetWithWhereClause("sku_id = " + skuid)
+		historicalpo, err = svc.HistoricalpoRepository.GetWithWhereClause("sku_id = '" + skuid + "'")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

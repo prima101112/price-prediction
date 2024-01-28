@@ -1,11 +1,5 @@
 package repository
 
-import (
-	"strings"
-
-	"github.com/prima101112/bababos-backend/pkg/algorithm"
-)
-
 // CREATE TABLE IF NOT EXISTS historypo (
 //     id SERIAL PRIMARY KEY,
 //     customer_id VARCHAR(255) NOT NULL,
@@ -34,11 +28,6 @@ type ResponsePrediction struct {
 	SKUName         string
 	SalesPO         SalesPO
 	PricePrediction float64
-}
-
-type SalesPO struct {
-	Time  []float64
-	Price []float64
 }
 
 type HistoricalpoRepository struct {
@@ -101,51 +90,4 @@ func (c *HistoricalpoRepository) GetAll() ([]HistoricalPO, error) {
 	}
 
 	return historicalpos, nil
-}
-
-func (c *HistoricalpoRepository) PredictSalesBySku(sku string) (ResponsePrediction, error) {
-
-	var responsePrediction ResponsePrediction
-	//validate sku format no space, no special character
-	sku = removeSpace(sku)
-
-	rows, err := c.Repository.DB.Query("SELECT sku_name, order_quantity, unit_selling_price FROM historicalpo WHERE sku_id = " + sku + " ORDER BY order_date DESC")
-	if err != nil {
-		return responsePrediction, err
-	}
-	defer rows.Close()
-	i := 0
-	var historicalpo HistoricalPO
-	var salespo SalesPO
-	for rows.Next() {
-		err := rows.Scan(&historicalpo.SKUName, &historicalpo.OrderQuantity, &historicalpo.UnitSellingPrice)
-		if err != nil {
-			return responsePrediction, err
-		}
-		salespo.Time[i] = float64(historicalpo.OrderQuantity)
-		salespo.Price[i] = historicalpo.UnitSellingPrice
-
-		i++
-	}
-
-	r, err := algorithm.NewRegression(salespo.Time, salespo.Price)
-	if err != nil {
-		return responsePrediction, err
-	}
-	pred, err := algorithm.PredictedSales(r, len(salespo.Time)+1)
-	if err != nil {
-		return responsePrediction, err
-	}
-
-	responsePrediction.SKUID = sku
-	responsePrediction.SKUName = historicalpo.SKUName
-	responsePrediction.SalesPO = salespo
-	responsePrediction.PricePrediction = pred
-
-	return responsePrediction, nil
-}
-
-// remove space function
-func removeSpace(s string) string {
-	return strings.Replace(s, " ", "", -1)
 }

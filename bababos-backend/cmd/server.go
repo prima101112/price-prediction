@@ -26,6 +26,9 @@ func NewServer() {
 	// initiate historicalpo service
 	pricelistsService := handler.NewPricelistsHandler(&repository.Repository{DB: db.DB})
 
+	// initiate historicalpo service
+	suggestionService := handler.NewSuggestionHandler(&repository.Repository{DB: db.DB})
+
 	//cors
 	r := mux.NewRouter()
 
@@ -36,6 +39,7 @@ func NewServer() {
 	r.HandleFunc("/customers", customerService.GetCustomersHandler).Methods("GET", "OPTIONS")
 	r.HandleFunc("/historicalpo", historicalpoService.GetHistoricalposHandler).Methods("GET", "OPTIONS")
 	r.HandleFunc("/pricelist", pricelistsService.GetPricelistsHandler).Methods("GET", "OPTIONS")
+	r.HandleFunc("/suggestion", suggestionService.GetSuggestionHandler).Methods("GET", "OPTIONS")
 
 	// Create a server and specify the address and port to listen on
 	serverAddr := ":8080" // You can change the port as needed

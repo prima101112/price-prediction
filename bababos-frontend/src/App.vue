@@ -16,6 +16,7 @@ import 'primevue/resources/themes/aura-dark-green/theme.css'
         <RouterLink title="About" to="/about"><Button class="button" label="About"></Button></RouterLink>
         <RouterLink title="Customers" to="/customers"><Button class="button" label="Customers"></Button></RouterLink>
         <RouterLink title="Historicalpo" to="/historicalpo"><Button class="button" label="Historicalpo"></Button></RouterLink>
+        <RouterLink title="Suggestions" to="/suggestion"><Button class="button" label="Suggestions"></Button></RouterLink>
       </nav>
       <br />
       <hr />
@@ -28,6 +29,16 @@ import 'primevue/resources/themes/aura-dark-green/theme.css'
 
 
 </template>
+
+<script>
+export default {
+  methods: {
+    reloadPage() {
+      window.location.reload();
+    }
+  }
+}
+</script>
 
 <style scoped>
   button {

@@ -16,7 +16,7 @@ func NewRegression(x, y []float64) (*regression.Regression, error) {
 	// Add data points
 	for i, xi := range x {
 		log.Printf("%+v", []float64{xi})
-		r.Train(regression.DataPoint(y[i], []float64{xi}))
+		r.Train(regression.DataPoint(xi, []float64{y[i]}))
 	}
 
 	// Run the regression
